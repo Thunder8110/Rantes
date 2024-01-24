@@ -1,5 +1,8 @@
 use clap::{Parser, Subcommand};
 
+mod gen;
+mod test;
+
 #[derive(Debug, Parser)]
 struct Args {
   #[command(subcommand)]
@@ -18,22 +21,10 @@ enum Subcommands {
   },
 }
 
-fn gen(problem: String) {
-  //
-}
-
-fn test(problem: String) {
-  //
-}
-
-fn main() {
+fn main() -> Result<(), String> {
   let arg = Args::parse();
   match arg.command {
-    Subcommands::Gen { problem } => {
-      gen(problem);
-    },
-    Subcommands::Test { problem } => {
-      test(problem);
-    },
+    Subcommands::Gen { problem } => gen::gen(problem),
+    Subcommands::Test { problem } => test::test(problem),
   }
 }
