@@ -1,4 +1,4 @@
-pub fn test(problem: String) -> Result<(), String> {
+pub fn test(problem: String) -> anyhow::Result<()> {
   println!("{}", problem);
   Ok(())
 }

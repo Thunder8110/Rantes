@@ -21,7 +21,7 @@ enum Subcommands {
   },
 }
 
-fn main() -> Result<(), String> {
+fn main() -> anyhow::Result<()> {
   let arg = Args::parse();
   match arg.command {
     Subcommands::Gen { problem } => gen::gen(problem),
