@@ -37,7 +37,7 @@ fn bin_is_ok(name: String) -> anyhow::Result<()> {
   let check_proc = process::Command::new("cargo")
   .arg("check")
   .arg("--bin")
-  .arg(name)
+  .arg(&name)
   .output()?;
 
   if check_proc.status.success() {
