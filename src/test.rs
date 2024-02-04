@@ -1,4 +1,4 @@
-use std::{env, io::{Read, Write}, process};
+use std::{io::{Read, Write}, process};
 
 use anyhow::{anyhow, bail};
 
