@@ -1,8 +1,8 @@
 use std::{env, io::{Read, Write}, process};
 
-use anyhow::bail;
+use anyhow::{anyhow, bail};
 
-pub fn test(problem: String) -> anyhow::Result<()> {
+pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   let curr_dir_path = env::current_dir()?;
   let src_bin_path = curr_dir_path.join("src").join("bin");
   match src_bin_path.try_exists() {
@@ -32,12 +32,27 @@ pub fn test(problem: String) -> anyhow::Result<()> {
     Err(e) => Err(e),
   }?;
 
-  exec_test(problem)?;
+  if iteration == 0 {
+    for iteration_count in 0usize.. {
+      match exec_test(&problem) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(anyhow!("test failed in iteration {}:\n{}", iteration_count, e))
+      }?
+    }
+  }else {
+    for iteration_count in 0..iteration {
+      match exec_test(&problem) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(anyhow!("test failed in iteration {}:\n{}", iteration_count, e))
+      }?
+    }
+  }
 
+  println!("iteration finished with no failure.");
   Ok(())
 }
 
-fn exec_test(problem: String) -> anyhow::Result<()> {
+fn exec_test(problem: &String) -> anyhow::Result<()> {
   let gen_proc = process::Command::new("cargo")
   .arg("run")
   .arg("--quiet")

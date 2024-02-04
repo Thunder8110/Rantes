@@ -18,6 +18,8 @@ enum Subcommands {
   #[command(about = "execute random test")]
   Test {
     problem: String,
+    #[clap(short, long, default_value = "0")]
+    iteration: usize,
   },
 }
 
@@ -25,6 +27,6 @@ fn main() -> anyhow::Result<()> {
   let arg = Args::parse();
   match arg.command {
     Subcommands::Gen { problem } => gen::gen(problem),
-    Subcommands::Test { problem } => test::test(problem),
+    Subcommands::Test { problem, iteration } => test::test(problem, iteration),
   }
 }
