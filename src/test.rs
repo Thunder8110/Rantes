@@ -4,7 +4,7 @@ use anyhow::{anyhow, bail};
 
 pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   check_bin(&problem)?;
-  
+
   if iteration == 0 {
     for iteration_count in 0usize.. {
       match exec_test(&problem) {
@@ -106,7 +106,7 @@ fn exec_test(problem: &String) -> anyhow::Result<()> {
       format!("{}", &input),
       "expected:".to_string(),
       format!("{}", &output_slow),
-      "actually:".to_string(),
+      "actual:".to_string(),
       format!("{}", &output_solver),
     ];
     bail!("{}", message.join("\n"))
