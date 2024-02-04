@@ -1,24 +1,41 @@
 use std::{io::{Read, Write}, process};
 
 use anyhow::bail;
+use indicatif::{ProgressBar, ProgressStyle};
 
 pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   check_bin(&problem)?;
 
   if iteration == 0 {
+    let pgb = ProgressBar::new(u64::MAX);
+    pgb.set_style(
+      ProgressStyle::with_template("[{elapsed_precise}] {bar:40} {pos:>7}")
+      .unwrap()
+      .progress_chars("##.")
+    );
     for iteration_count in 0usize.. {
       match exec_test(&problem) {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
-      }?
+      }?;
+      pgb.inc(1);
     }
+    pgb.finish();
   }else {
+    let pgb = ProgressBar::new(iteration as u64);
+    pgb.set_style(
+      ProgressStyle::with_template("[{elapsed_precise}] {bar:40} {pos:>7}/{len:7}")
+      .unwrap()
+      .progress_chars("##.")
+    );
     for iteration_count in 0..iteration {
       match exec_test(&problem) {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
-      }?
+      }?;
+      pgb.inc(1);
     }
+    pgb.finish();
   }
 
   println!("iteration finished with no failure.");
