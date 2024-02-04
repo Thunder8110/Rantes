@@ -1,6 +1,6 @@
 use std::{io::{Read, Write}, process};
 
-use anyhow::{anyhow, bail};
+use anyhow::bail;
 
 pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   check_bin(&problem)?;
@@ -8,15 +8,15 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   if iteration == 0 {
     for iteration_count in 0usize.. {
       match exec_test(&problem) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(anyhow!("test failed in iteration {}:\n{}", iteration_count, e))
+        Ok(()) => anyhow::Ok(()),
+        Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?
     }
   }else {
     for iteration_count in 0..iteration {
       match exec_test(&problem) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(anyhow!("test failed in iteration {}:\n{}", iteration_count, e))
+        Ok(()) => anyhow::Ok(()),
+        Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?
     }
   }
