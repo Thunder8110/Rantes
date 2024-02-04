@@ -26,36 +26,25 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
 }
 
 fn check_bin(problem: &String) -> anyhow::Result<()> {
-  let curr_dir_path = env::current_dir()?;
-  let src_bin_path = curr_dir_path.join("src").join("bin");
-  match src_bin_path.try_exists() {
-    Ok(true) => Ok(()),
-    Ok(false) => bail!("src/bin does not exists."),
-    Err(e) => Err(e),
-  }?;
-
-  let problem_gen_path = src_bin_path.join(format!("{}_gen.rs", &problem));
-  match problem_gen_path.try_exists() {
-    Ok(true) => Ok(()),
-    Ok(false) => bail!("generator for {} does not exists.", &problem),
-    Err(e) => Err(e),
-  }?;
-  
-  let solve_slow_path = src_bin_path.join(format!("{}_slow.rs", &problem));
-  match solve_slow_path.try_exists() {
-    Ok(true) => Ok(()),
-    Ok(false) => bail!("slow code for {} does not exists.", &problem),
-    Err(e) => Err(e),
-  }?;
-
-  let solve_path = src_bin_path.join(format!("{}.rs", &problem));
-  match solve_path.try_exists() {
-    Ok(true) => Ok(()),
-    Ok(false) => bail!("solver code for {} does not exists.", &problem),
-    Err(e) => Err(e),
-  }?;
+  bin_is_ok(format!("{}_gen", &problem))?;
+  bin_is_ok(format!("{}_slow", &problem))?;
+  bin_is_ok(format!("{}", &problem))?;
 
   Ok(())
+}
+
+fn bin_is_ok(name: String) -> anyhow::Result<()> {
+  let check_proc = process::Command::new("cargo")
+  .arg("check")
+  .arg("--bin")
+  .arg(name)
+  .output()?;
+
+  if check_proc.status.success() {
+    Ok(())
+  }else {
+    bail!("{} bin does not exist or be not compilable.", &name)
+  }
 }
 
 fn exec_test(problem: &String) -> anyhow::Result<()> {
