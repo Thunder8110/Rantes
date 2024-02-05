@@ -1,10 +1,37 @@
-use std::{io::{Read, Write}, process};
+use std::{io::{Read, Write}, process, sync::{atomic::{AtomicBool, Ordering}, Arc}, thread, time::Duration};
 
 use anyhow::bail;
+use crossterm::{event::{self, Event, KeyCode, KeyEvent, KeyModifiers}, terminal};
 use indicatif::{ProgressBar, ProgressStyle};
 
 pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   check_bin(&problem)?;
+
+  let stop = Arc::new(AtomicBool::new(false));
+  let stop_clone = stop.clone();
+  thread::spawn(move || {
+    loop {
+      match event::read() {
+        Ok(Event::Key(KeyEvent {
+          code: KeyCode::Char('q'),
+          ..
+        }))
+        | Ok(Event::Key(KeyEvent {
+          code: KeyCode::Char('c'),
+          modifiers: KeyModifiers::CONTROL,
+          ..
+        })) => {
+          stop_clone.store(true, Ordering::SeqCst);
+          break Ok(());
+        },
+        Ok(_) => (),
+        Err(e) => bail!(e),
+      }
+      thread::sleep(Duration::from_millis(50));
+    }
+  });
+
+  terminal::enable_raw_mode()?;
 
   if iteration == 0 {
     let progress_bar = ProgressBar::new(u64::MAX);
@@ -14,13 +41,17 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
       .progress_chars("##.")
     );
     for iteration_count in 0usize.. {
+      if stop.load(Ordering::SeqCst) {
+        break;
+      }
+      
       match exec_test(&problem) {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?;
       progress_bar.inc(1);
     }
-    progress_bar.finish();
+    progress_bar.abandon();
   }else {
     let progress_bar = ProgressBar::new(iteration as u64);
     progress_bar.set_style(
@@ -29,14 +60,20 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
       .progress_chars("##.")
     );
     for iteration_count in 0..iteration {
+      if stop.load(Ordering::SeqCst) {
+        break;
+      }
+      
       match exec_test(&problem) {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?;
       progress_bar.inc(1);
     }
-    progress_bar.finish();
+    progress_bar.abandon();
   }
+
+  terminal::disable_raw_mode()?;
 
   println!("iteration finished with no failure.");
   Ok(())
