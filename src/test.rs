@@ -7,8 +7,8 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
   check_bin(&problem)?;
 
   if iteration == 0 {
-    let pgb = ProgressBar::new(u64::MAX);
-    pgb.set_style(
+    let progress_bar = ProgressBar::new(u64::MAX);
+    progress_bar.set_style(
       ProgressStyle::with_template("[{elapsed_precise}] {bar:40} {pos:>7}")
       .unwrap()
       .progress_chars("##.")
@@ -18,12 +18,12 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?;
-      pgb.inc(1);
+      progress_bar.inc(1);
     }
-    pgb.finish();
+    progress_bar.finish();
   }else {
-    let pgb = ProgressBar::new(iteration as u64);
-    pgb.set_style(
+    let progress_bar = ProgressBar::new(iteration as u64);
+    progress_bar.set_style(
       ProgressStyle::with_template("[{elapsed_precise}] {bar:40} {pos:>7}/{len:7}")
       .unwrap()
       .progress_chars("##.")
@@ -33,9 +33,9 @@ pub fn test(problem: String, iteration: usize) -> anyhow::Result<()> {
         Ok(()) => anyhow::Ok(()),
         Err(e) => bail!("test failed in iteration {}:\n{}", iteration_count, e),
       }?;
-      pgb.inc(1);
+      progress_bar.inc(1);
     }
-    pgb.finish();
+    progress_bar.finish();
   }
 
   println!("iteration finished with no failure.");
