@@ -18,14 +18,14 @@ pub fn gen(problem: String) -> anyhow::Result<()> {
 
   let problem_gen_path = src_bin_path.join(format!("{}_gen.rs", &problem));
   match problem_gen_path.try_exists() {
-    Ok(true) => bail!("generator for {} is exists.", &problem),
+    Ok(true) => bail!("generator for {} exists.", &problem),
     Ok(false) => fs::File::create(&problem_gen_path),
     Err(e) => Err(e),
   }?;
   
   let solve_slow_path = src_bin_path.join(format!("{}_slow.rs", &problem));
   match solve_slow_path.try_exists() {
-    Ok(true) => bail!("slow code for {} is exists.", &problem),
+    Ok(true) => bail!("slow code for {} exists.", &problem),
     Ok(false) => fs::File::create(&solve_slow_path),
     Err(e) => Err(e),
   }?;
